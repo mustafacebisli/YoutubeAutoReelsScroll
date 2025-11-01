@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Shorts Otomatik Kaydırma",
+  "version": "1.0.0",
+  "description": "YouTube Shorts videolarında otomatik olarak bir sonraki videoya geçiş yapar",
+  "permissions": [
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://www.youtube.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/shorts/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "YouTube Shorts Otomatik Kaydırma"
+  }
+}
+
