@@ -26,7 +26,7 @@
     video.addEventListener('ended', () => {
       if (!isEnabled || hasTriggeredSwipe) return;
       
-      console.log('✅ Video tamamen bitti, bir sonraki videoya geçiliyor...');
+      console.log('✅ Video bitti, bir sonraki videoya geçiliyor...');
       hasTriggeredSwipe = true;
       swipeToNextVideo();
       
@@ -34,6 +34,22 @@
       setTimeout(() => {
         hasTriggeredSwipe = false;
       }, 2000);
+    });
+
+    // Video ilerleme eventini dinle
+    video.addEventListener('timeupdate', () => {
+      if (!isEnabled || hasTriggeredSwipe) return;
+      
+      // Video %95 oranında izlendiyse bir sonraki videoya geç
+      if (video.duration > 0 && (video.currentTime / video.duration) > 0.99) {
+        console.log('✅ Video %95 tamamlandı, bir sonraki videoya geçiliyor...');
+        hasTriggeredSwipe = true;
+        swipeToNextVideo();
+        
+        setTimeout(() => {
+          hasTriggeredSwipe = false;
+        }, 2000);
+      }
     });
   }
 
