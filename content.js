@@ -17,39 +17,60 @@
 
   // Video event listener ekle
   function attachVideoListeners(video) {
-    if (!video || video.hasEventListener) return;
+    if (!video) {
+      console.log('⚠️ Video elementi null');
+      return;
+    }
     
-    console.log('📹 Video elementine listener eklendi');
+    console.log('📹 Video elementine listener eklendi, duration:', video.duration);
+    
+    // Aynı videoya tekrar listener ekleme
+    if (video.hasEventListener) {
+      console.log('⚠️ Listener zaten var, atlanıyor');
+      return;
+    }
+    
     video.hasEventListener = true;
 
     // Video bitme eventini dinle
     video.addEventListener('ended', () => {
-      if (!isEnabled || hasTriggeredSwipe) return;
+      console.log('🎬 ENDED event tetiklendi - isEnabled:', isEnabled, 'hasTriggeredSwipe:', hasTriggeredSwipe);
+      
+      if (!isEnabled || hasTriggeredSwipe) {
+        console.log('⚠️ Kaydırma atlandı');
+        return;
+      }
       
       console.log('✅ Video bitti, bir sonraki videoya geçiliyor...');
       hasTriggeredSwipe = true;
       swipeToNextVideo();
       
-      // 2 saniye sonra flag'i sıfırla
+      // 3 saniye sonra flag'i sıfırla
       setTimeout(() => {
         hasTriggeredSwipe = false;
-      }, 2000);
+        console.log('🔄 Flag sıfırlandı, hazır');
+      }, 3000);
     });
 
-    // Video ilerleme eventini dinle
+    // Video ilerleme eventini de dinle (yedek kontrol)
+    let lastProgress = 0;
     video.addEventListener('timeupdate', () => {
       if (!isEnabled || hasTriggeredSwipe) return;
       
-      // Video %95 oranında izlendiyse bir sonraki videoya geç
-      if (video.duration > 0 && (video.currentTime / video.duration) > 0.99) {
-        console.log('✅ Video %95 tamamlandı, bir sonraki videoya geçiliyor...');
+      const progress = video.currentTime / video.duration;
+      
+      // %98 oranında izlendiyse bir sonraki videoya geç
+      if (video.duration > 0 && progress >= 0.98 && lastProgress < 0.98) {
+        console.log('✅ Video %98 tamamlandı, bir sonraki videoya geçiliyor...');
         hasTriggeredSwipe = true;
         swipeToNextVideo();
         
         setTimeout(() => {
           hasTriggeredSwipe = false;
-        }, 2000);
+          console.log('🔄 Flag sıfırlandı, hazır');
+        }, 3000);
       }
+      lastProgress = progress;
     });
   }
 
@@ -64,12 +85,18 @@
     const currentVideoId = window.location.pathname.split('/').pop();
     
     // Yeni video yüklendiğinde
-    if (currentVideoId !== lastVideoId) {
+    if (currentVideoId !== lastVideoId && currentVideoId) {
       lastVideoId = currentVideoId;
       console.log('🔄 Yeni video yüklendi:', currentVideoId);
       
+      // hasTriggeredSwipe flag'ini sıfırla
+      hasTriggeredSwipe = false;
+      
       // Video elementini sıfırla ve yeniden listener ekle
-      videoElement.hasEventListener = false;
+      if (videoElement.hasEventListener) {
+        videoElement.hasEventListener = false;
+        console.log('🔄 Video element listener sıfırlandı');
+      }
       attachVideoListeners(videoElement);
     }
 
@@ -83,30 +110,27 @@
   function swipeToNextVideo() {
     console.log('🚀 Kaydırma işlemi başlatılıyor...');
     
-    // Yöntem 1: Sonraki video butonu
-    const nextButton = document.querySelector('button[aria-label*="Sonraki"], button[aria-label*="Next"]');
+    // Yöntem 1: Sonraki video butonu (hemen dene)
+    const nextButton = document.querySelector('button[aria-label*="Sonraki"], button[aria-label*="Next"], button[aria-label*="Skip"]');
     if (nextButton && nextButton.offsetParent !== null) {
       console.log('✅ Sonraki buton bulundu, tıklanıyor...');
       nextButton.click();
       return;
     }
 
-    // Yöntem 2: Klavye kısayolu (Arrow Down)
-    console.log('⌨️ Klavye kısayolu deneniyor...');
-    const videoContainer = document.querySelector('body');
-    if (videoContainer) {
-      const keyboardEvent = new KeyboardEvent('keydown', {
-        key: 'ArrowDown',
-        code: 'ArrowDown',
-        keyCode: 40,
-        which: 40,
-        bubbles: true,
-        cancelable: true
-      });
-      videoContainer.dispatchEvent(keyboardEvent);
-    }
-
-    // Yöntem 3: Page Down tuşu
+    // Yöntem 2: ArrowDown klavye tuşu
+    console.log('⌨️ Arrow Down tuşu deneniyor...');
+    const keyboardEvent = new KeyboardEvent('keydown', {
+      key: 'ArrowDown',
+      code: 'ArrowDown',
+      keyCode: 40,
+      which: 40,
+      bubbles: true,
+      cancelable: true
+    });
+    document.dispatchEvent(keyboardEvent);
+    
+    // Yöntem 3: Page Down tuşu (yedek)
     setTimeout(() => {
       console.log('⌨️ Page Down tuşu deneniyor...');
       const pageDownEvent = new KeyboardEvent('keydown', {
@@ -119,36 +143,6 @@
       });
       document.dispatchEvent(pageDownEvent);
     }, 100);
-
-    // Yöntem 4: Scroll ile
-    setTimeout(() => {
-      console.log('📜 Scroll ile kaydırma deneniyor...');
-      window.scrollBy({
-        top: window.innerHeight * 0.8,
-        behavior: 'smooth'
-      });
-    }, 200);
-
-    // Yöntem 5: Shorts player container'a tıkla ve kaydır
-    setTimeout(() => {
-      console.log('🎯 Shorts container ile kaydırma deneniyor...');
-      const shortsContainer = document.querySelector('[id*="shorts-player"], ytd-shorts-player');
-      if (shortsContainer) {
-        const clickEvent = new MouseEvent('click', {
-          view: window,
-          bubbles: true,
-          cancelable: true,
-          clientX: window.innerWidth / 2,
-          clientY: window.innerHeight / 2
-        });
-        shortsContainer.dispatchEvent(clickEvent);
-        
-        window.scrollBy({
-          top: window.innerHeight,
-          behavior: 'smooth'
-        });
-      }
-    }, 300);
   }
 
   // Extension için kontrol fonksiyonları
@@ -156,14 +150,18 @@
     isEnabled = true;
     console.log('✅ Otomatik kaydırma ETKİNLEŞTİRİLDİ');
     
-    if (!videoCheckInterval) {
-      videoCheckInterval = setInterval(checkVideoStatus, 500);
-    }
-
     // İlk video elementini hemen bul ve listener ekle
     videoElement = getVideoElement();
-    if (videoElement) {
+    const currentVideoId = window.location.pathname.split('/').pop();
+    
+    if (videoElement && currentVideoId) {
+      lastVideoId = currentVideoId;
+      console.log('🎬 İlk video ID set edildi:', currentVideoId);
       attachVideoListeners(videoElement);
+    }
+    
+    if (!videoCheckInterval) {
+      videoCheckInterval = setInterval(checkVideoStatus, 500);
     }
   }
 
