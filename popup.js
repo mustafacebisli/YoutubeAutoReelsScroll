@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const toggleSwitch = document.getElementById('toggleSwitch');
   const status = document.getElementById('status');
+  const refreshBtn = document.getElementById('refreshBtn');
 
   // Mevcut durumu al
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -49,6 +50,19 @@ document.addEventListener('DOMContentLoaded', () => {
           status.textContent = 'Kapalı - Manuel kontrol';
         }
       });
+    });
+  });
+
+  // Yenile butonuna tıklandığında
+  refreshBtn.addEventListener('click', () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (chrome.runtime.lastError) {
+        console.error('Error:', chrome.runtime.lastError);
+        return;
+      }
+      
+      chrome.tabs.reload(tabs[0].id);
+      window.close(); // Popup'ı kapat
     });
   });
 });

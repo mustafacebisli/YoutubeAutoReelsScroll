@@ -60,6 +60,25 @@
       background-color: #f5f5f5;
       border-radius: 4px;
     }
+    .refresh-btn {
+      width: 100%;
+      padding: 8px;
+      margin-top: 10px;
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background-color 0.3s;
+    }
+    .refresh-btn:hover {
+      background-color: #1976D2;
+    }
+    .refresh-btn:active {
+      background-color: #1565C0;
+    }
   </style>
 </head>
 <body>
@@ -71,6 +90,7 @@
     </div>
   </div>
   <div class="status" id="status">Yükleniyor...</div>
+  <button class="refresh-btn" id="refreshBtn">🔄 Sayfayı Yenile</button>
 
   <script src="popup.js"></script>
 </body>
