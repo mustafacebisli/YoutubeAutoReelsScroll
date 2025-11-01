@@ -59,9 +59,9 @@
       
       const progress = video.currentTime / video.duration;
       
-      // %98 oranında izlendiyse bir sonraki videoya geç
+      // Video %100 olduğunda geç (ended event yedek olarak)
       if (video.duration > 0 && progress >= 0.98 && lastProgress < 0.98) {
-        console.log('✅ Video %98 tamamlandı, bir sonraki videoya geçiliyor...');
+        console.log('✅ Video %100 tamamlandı, bir sonraki videoya geçiliyor...');
         hasTriggeredSwipe = true;
         swipeToNextVideo();
         
